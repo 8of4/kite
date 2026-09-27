@@ -429,6 +429,14 @@ export const nodeActionMessagePublishDataSchema = nodeBaseDataSchema.extend({
   message_target: messageTargetSchema,
 });
 
+export const nodeActionForumPostTagAddDataSchema = nodeBaseDataSchema.extend({
+  channel_target: numericOrPlaceholder("ID of the forum post."),
+  forum_tag_id: numericOrPlaceholder("ID of the tag."),
+});
+
+export const nodeActionForumPostTagRemoveDataSchema =
+  nodeActionForumPostTagAddDataSchema;
+
 export const nodeActionMessagePinDataSchema = nodeActionMessageDeleteDataSchema;
 
 export const emojiDataSchema = z.object({
