@@ -43,6 +43,7 @@ export const nodeTypes = {
   action_forum_post_tag_add: FlowNodeActionBase,
   action_forum_post_tag_remove: FlowNodeActionBase,
   action_private_message_create: FlowNodeActionMessage,
+  action_private_message_edit: FlowNodeActionMessage,
   action_message_reaction_create: FlowNodeActionBase,
   action_message_reaction_delete: FlowNodeActionBase,
   action_message_pin: FlowNodeActionBase,

@@ -29,6 +29,7 @@ export const FlowNodeTypeActionMessagePublish: FlowNodeType = "action_message_pu
 export const FlowNodeTypeActionForumPostTagAdd: FlowNodeType = "action_forum_post_tag_add";
 export const FlowNodeTypeActionForumPostTagRemove: FlowNodeType = "action_forum_post_tag_remove";
 export const FlowNodeTypeActionPrivateMessageCreate: FlowNodeType = "action_private_message_create";
+export const FlowNodeTypeActionPrivateMessageEdit: FlowNodeType = "action_private_message_edit";
 export const FlowNodeTypeActionMessageReactionCreate: FlowNodeType = "action_message_reaction_create";
 export const FlowNodeTypeActionMessageReactionDelete: FlowNodeType = "action_message_reaction_delete";
 export const FlowNodeTypeActionMessagePin: FlowNodeType = "action_message_pin";
