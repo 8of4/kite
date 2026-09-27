@@ -62,6 +62,7 @@ const (
 	FlowNodeTypeActionForumPostTagAdd       FlowNodeType = "action_forum_post_tag_add"
 	FlowNodeTypeActionForumPostTagRemove    FlowNodeType = "action_forum_post_tag_remove"
 	FlowNodeTypeActionPrivateMessageCreate  FlowNodeType = "action_private_message_create"
+	FlowNodeTypeActionPrivateMessageEdit    FlowNodeType = "action_private_message_edit"
 	FlowNodeTypeActionMessageReactionCreate FlowNodeType = "action_message_reaction_create"
 	FlowNodeTypeActionMessageReactionDelete FlowNodeType = "action_message_reaction_delete"
 	FlowNodeTypeActionMessagePin            FlowNodeType = "action_message_pin"
