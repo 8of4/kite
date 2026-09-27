@@ -119,6 +119,7 @@ const intputs: Record<string, any> = {
   message_target: MessageTargetInput,
   message_count: MessageCountInput,
   message_ignore_pinned: MessageIgnorePinnedInput,
+  forum_tag_id: ForumTagIdInput,
   emoji_data: EmojiDataInput,
   response_target: ResponseTargetInput,
   message_ephemeral: MessageEphemeralInput,
@@ -1477,6 +1478,20 @@ function MessageIgnorePinnedInput({ data, updateData, errors }: InputProps) {
       value={data.message_ignore_pinned || false}
       updateValue={(v) => updateData({ message_ignore_pinned: v || undefined })}
       errors={errors}
+    />
+  );
+}
+
+function ForumTagIdInput({ data, updateData, errors }: InputProps) {
+  return (
+    <BaseInput
+      type="text"
+      field="forum_tag_id"
+      title="Tag"
+      value={data.forum_tag_id || ""}
+      updateValue={(v) => updateData({ forum_tag_id: v || undefined })}
+      errors={errors}
+      placeholders
     />
   );
 }
