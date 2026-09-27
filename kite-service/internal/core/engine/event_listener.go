@@ -116,6 +116,22 @@ func (l *EventListener) shouldHandleEvent(e ws.Event) bool {
 		return !d.Unavailable && time.Since(d.Joined.Time()) < time.Minute
 	case *gateway.GuildDeleteEvent:
 		return !d.Unavailable
+	case *gateway.ChannelCreateEvent:
+		return true
+	case *gateway.ChannelUpdateEvent:
+		return true
+	case *gateway.ChannelDeleteEvent:
+		return true
+	case *gateway.ChannelPinsUpdateEvent:
+		return true
+	case *gateway.ThreadCreateEvent:
+		return true
+	case *gateway.ThreadUpdateEvent:
+		return true
+	case *gateway.ThreadDeleteEvent:
+		return true
+	case *gateway.ThreadMembersUpdateEvent:
+		return true
 	}
 
 	return false

@@ -9,6 +9,14 @@ import { describeSchedule } from "@/lib/flow/schedule";
 const eventTitles: Record<string, string> = {
   guild_create: "Bot joined a server",
   guild_delete: "Bot left a server",
+  channel_create: "Channel created",
+  channel_delete: "Channel deleted",
+  channel_update: "Channel updated",
+  channel_pins_update: "Channel pins updated",
+  thread_create: "Thread created",
+  thread_update: "Thread updated",
+  thread_delete: "Thread deleted",
+  thread_members_update: "Thread members updated",
 };
 
 export default function FlowNodeEntryEvent(props: NodeProps) {

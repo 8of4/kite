@@ -737,6 +737,14 @@ function EventTypeInput({ data, updateData, errors }: InputProps) {
         { value: "guild_member_remove", label: "Server Member Remove" },
         { value: "guild_create", label: "Bot Joined Server" },
         { value: "guild_delete", label: "Bot Left Server" },
+        { value: "channel_create", label: "Channel Create" },
+        { value: "channel_delete", label: "Channel Delete" },
+        { value: "channel_update", label: "Channel Update" },
+        { value: "channel_pins_update", label: "Channel Pins Update" },
+        { value: "thread_create", label: "Thread Create" },
+        { value: "thread_update", label: "Thread Update" },
+        { value: "thread_delete", label: "Thread Delete" },
+        { value: "thread_members_update", label: "Thread Members Update" },
       ]}
       value={data.event_type || ""}
       updateValue={(v) => updateData({ event_type: v || undefined })}
