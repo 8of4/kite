@@ -91,6 +91,8 @@ const (
 	FlowNodeTypeActionRoleDelete            FlowNodeType = "action_role_delete"
 	FlowNodeTypeActionRoleMove              FlowNodeType = "action_role_move"
 	FlowNodeTypeActionGuildGet              FlowNodeType = "action_guild_get"
+	FlowNodeTypeActionInviteList            FlowNodeType = "action_invite_list"
+	FlowNodeTypeActionInviteDelete          FlowNodeType = "action_invite_delete"
 	FlowNodeTypeActionMessageGet            FlowNodeType = "action_message_get"
 	FlowNodeTypeActionRobloxUserGet         FlowNodeType = "action_roblox_user_get"
 	FlowNodeTypeActionHTTPRequest           FlowNodeType = "action_http_request"
@@ -187,6 +189,8 @@ type FlowNodeData struct {
 	MessageIgnorePinned bool                 `json:"message_ignore_pinned,omitempty"`
 
 	ForumTagID string `json:"forum_tag_id,omitempty"`
+
+	InviteCode string `json:"invite_code,omitempty"`
 
 	// Message Reaction Create, Delete
 	EmojiData *EmojiData `json:"emoji_data,omitempty"`

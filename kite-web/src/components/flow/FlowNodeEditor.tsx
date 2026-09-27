@@ -125,6 +125,7 @@ const intputs: Record<string, any> = {
   thread_invitable: ThreadInvitableInput,
   thread_auto_archive_duration: ThreadAutoArchiveDurationInput,
   thread_slowmode: ThreadSlowmodeInput,
+  invite_code: InviteCodeInput,
   emoji_data: EmojiDataInput,
   response_target: ResponseTargetInput,
   message_ephemeral: MessageEphemeralInput,
@@ -1576,6 +1577,20 @@ function ThreadSlowmodeInput({ data, updateData, errors }: InputProps) {
       title="Slowmode (seconds)"
       value={data.thread_slowmode || ""}
       updateValue={(v) => updateData({ thread_slowmode: v || undefined })}
+      errors={errors}
+      placeholders
+    />
+  );
+}
+
+function InviteCodeInput({ data, updateData, errors }: InputProps) {
+  return (
+    <BaseInput
+      type="text"
+      field="invite_code"
+      title="Invite Code"
+      value={data.invite_code || ""}
+      updateValue={(v) => updateData({ invite_code: v || undefined })}
       errors={errors}
       placeholders
     />
