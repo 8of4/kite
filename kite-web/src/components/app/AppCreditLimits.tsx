@@ -4,7 +4,7 @@ import {
   useCreditLimitUpsertMutation,
   useCreditLimitDeleteMutation,
 } from "@/lib/api/mutations";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
@@ -17,56 +17,66 @@ import {
 } from "../ui/select";
 import { Trash2Icon } from "lucide-react";
 
-function useCreditLimitActions(appId: string) {
-  const upsert = useCreditLimitUpsertMutation(appId);
-  const remove = useCreditLimitDeleteMutation(appId);
-  return { upsert, remove };
-}
-
-function DefaultLimitInput({
+function DefaultLimitRow({
   appId,
   type,
-  label,
+  title,
+  description,
   value,
 }: {
   appId: string;
   type: "server" | "user";
-  label: string;
+  title: string;
+  description: string;
   value: number;
 }) {
-  const { upsert, remove } = useCreditLimitActions(appId);
+  const upsert = useCreditLimitUpsertMutation(appId);
+  const remove = useCreditLimitDeleteMutation(appId);
   const [input, setInput] = useState(value ? String(value) : "");
+
+  useEffect(() => {
+    setInput(value ? String(value) : "");
+  }, [value]);
+
+  const dirty = (value ? String(value) : "") !== input.trim();
 
   function save() {
     const max = parseInt(input, 10);
-    if (!input || isNaN(max) || max <= 0) {
+    if (!input.trim() || isNaN(max) || max <= 0) {
       remove.mutate(
         { type, target_id: null },
-        { onSuccess: () => toast.success("Limit removed") }
+        { onSuccess: () => toast.success(`${title} limit removed`) }
       );
       return;
     }
     upsert.mutate(
       { type, target_id: null, max_credits: max },
-      { onSuccess: () => toast.success("Limit saved") }
+      { onSuccess: () => toast.success(`${title} limit saved`) }
     );
   }
 
   return (
-    <div className="flex items-end gap-3">
-      <div className="flex-1">
-        <div className="text-sm font-medium mb-1">{label}</div>
+    <div className="rounded-lg border p-4">
+      <div className="font-medium text-foreground">{title}</div>
+      <div className="text-sm text-muted-foreground mb-3">{description}</div>
+      <div className="flex items-center gap-2">
         <Input
           type="number"
-          min={0}
-          placeholder="No limit"
+          min={1}
+          placeholder="Unlimited"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          className="max-w-40"
         />
+        <span className="text-sm text-muted-foreground">credits / month</span>
+        <Button
+          className="ml-auto"
+          onClick={save}
+          disabled={!dirty || upsert.isPending || remove.isPending}
+        >
+          Save
+        </Button>
       </div>
-      <Button onClick={save} disabled={upsert.isPending || remove.isPending}>
-        Save
-      </Button>
     </div>
   );
 }
@@ -75,7 +85,9 @@ export default function AppCreditLimits() {
   const appId = useAppId();
   const { data } = useCreditLimitsQuery(appId);
   const limits = data?.success ? data.data : undefined;
-  const { upsert, remove } = useCreditLimitActions(appId);
+
+  const upsert = useCreditLimitUpsertMutation(appId);
+  const remove = useCreditLimitDeleteMutation(appId);
 
   const [newType, setNewType] = useState<"server" | "user">("server");
   const [newTarget, setNewTarget] = useState("");
@@ -95,14 +107,14 @@ export default function AppCreditLimits() {
   function addOverride() {
     const max = parseInt(newMax, 10);
     if (!newTarget.trim() || isNaN(max) || max <= 0) {
-      toast.error("Enter a target ID and a credit limit above 0");
+      toast.error("Enter an ID and a credit limit above 0");
       return;
     }
     upsert.mutate(
       { type: newType, target_id: newTarget.trim(), max_credits: max },
       {
         onSuccess: () => {
-          toast.success("Override added");
+          toast.success("Override saved");
           setNewTarget("");
           setNewMax("");
         },
@@ -111,88 +123,99 @@ export default function AppCreditLimits() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-4 max-w-lg">
-        <div className="text-sm text-muted-foreground">
-          Default monthly credit limits applied to every server and user. Leave
-          empty for no limit.
+    <div className="space-y-10 max-w-2xl">
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">
+            Default limits
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Applied to every server and every user, unless overridden below.
+          </p>
         </div>
-        <DefaultLimitInput
+        <DefaultLimitRow
           appId={appId}
           type="server"
-          label="Per server"
+          title="Per server"
+          description="Most credits any one server can spend each month."
           value={defaults.server}
         />
-        <DefaultLimitInput
+        <DefaultLimitRow
           appId={appId}
           type="user"
-          label="Per user"
+          title="Per user"
+          description="Most credits any one user can spend each month."
           value={defaults.user}
         />
       </div>
 
-      <div className="space-y-3 max-w-2xl">
-        <div className="text-lg font-semibold">Specific overrides</div>
-        <div className="text-sm text-muted-foreground">
-          Set a different monthly limit for a specific server or user by ID.
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">
+            Overrides
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Set a different monthly limit for a specific server or user by its
+            Discord ID. Overrides take priority over the defaults.
+          </p>
         </div>
 
-        <div className="flex items-end gap-2 flex-wrap">
-          <div>
-            <div className="text-sm font-medium mb-1">Type</div>
-            <Select
-              value={newType}
-              onValueChange={(v) => setNewType(v as "server" | "user")}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="server">Server</SelectItem>
-                <SelectItem value="user">User</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex-1 min-w-40">
-            <div className="text-sm font-medium mb-1">
-              {newType === "server" ? "Server ID" : "User ID"}
+        <div className="rounded-lg border p-4 space-y-3">
+          <div className="flex items-end gap-2 flex-wrap">
+            <div>
+              <div className="text-sm font-medium mb-1">Applies to</div>
+              <Select
+                value={newType}
+                onValueChange={(v) => setNewType(v as "server" | "user")}
+              >
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="server">A server</SelectItem>
+                  <SelectItem value="user">A user</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Input
-              value={newTarget}
-              onChange={(e) => setNewTarget(e.target.value)}
-              placeholder="123456789012345678"
-            />
+            <div className="flex-1 min-w-44">
+              <div className="text-sm font-medium mb-1">
+                {newType === "server" ? "Server ID" : "User ID"}
+              </div>
+              <Input
+                value={newTarget}
+                onChange={(e) => setNewTarget(e.target.value)}
+                placeholder="123456789012345678"
+              />
+            </div>
+            <div className="w-32">
+              <div className="text-sm font-medium mb-1">Credits / month</div>
+              <Input
+                type="number"
+                min={1}
+                value={newMax}
+                onChange={(e) => setNewMax(e.target.value)}
+              />
+            </div>
+            <Button onClick={addOverride} disabled={upsert.isPending}>
+              Add
+            </Button>
           </div>
-          <div className="w-32">
-            <div className="text-sm font-medium mb-1">Max credits</div>
-            <Input
-              type="number"
-              min={0}
-              value={newMax}
-              onChange={(e) => setNewMax(e.target.value)}
-            />
-          </div>
-          <Button onClick={addOverride} disabled={upsert.isPending}>
-            Add
-          </Button>
         </div>
 
-        <div className="divide-y rounded-md border">
-          {overrides.length === 0 ? (
-            <div className="p-3 text-sm text-muted-foreground">
-              No overrides yet.
-            </div>
-          ) : (
-            overrides.map((l) => (
+        {overrides.length > 0 && (
+          <div className="divide-y rounded-lg border">
+            {overrides.map((l) => (
               <div
                 key={`${l?.type}:${l?.target_id}`}
                 className="flex items-center justify-between p-3"
               >
                 <div className="text-sm">
-                  <span className="capitalize">{l?.type}</span>{" "}
+                  <span className="capitalize font-medium">{l?.type}</span>{" "}
                   <span className="text-muted-foreground">{l?.target_id}</span>
-                  {" — "}
-                  {l?.max_credits} credits / month
+                  <span className="text-muted-foreground">
+                    {" "}
+                    ({l?.max_credits} credits / month)
+                  </span>
                 </div>
                 <Button
                   size="icon"
@@ -207,9 +230,9 @@ export default function AppCreditLimits() {
                   <Trash2Icon className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

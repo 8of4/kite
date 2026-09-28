@@ -12,9 +12,6 @@ import (
 	"github.com/kitecloud/kite/kite-service/internal/model"
 )
 
-// respondCreditLimit tells the user their flow was blocked by a usage limit.
-// Only command and component interactions can be replied to; other events stop
-// silently since there is no one to respond to.
 func respondCreditLimit(ctx context.Context, session *state.State, event gateway.Event, message string) {
 	i, ok := event.(*gateway.InteractionCreateEvent)
 	if !ok {
@@ -30,9 +27,6 @@ func respondCreditLimit(ctx context.Context, session *state.State, event gateway
 	})
 }
 
-// creditLimitExceeded reports whether the given server or user has reached a
-// credit limit the app owner configured for this month. The returned message is
-// meant to be shown to the user that triggered the flow.
 func (s Env) creditLimitExceeded(ctx context.Context, appID string, guildID discord.GuildID, userID discord.UserID) (bool, string) {
 	if s.CreditLimitStore == nil {
 		return false, ""
@@ -66,9 +60,6 @@ func (s Env) creditLimitExceeded(ctx context.Context, appID string, guildID disc
 	return false, ""
 }
 
-// resolveLimit returns the credit cap for a target: a limit set for the
-// specific target id if one exists, otherwise the default limit (no target id).
-// A cap of 0 means no limit.
 func resolveLimit(limits []model.CreditLimit, limitType model.CreditLimitType, targetID string) int {
 	def := 0
 	for _, l := range limits {
