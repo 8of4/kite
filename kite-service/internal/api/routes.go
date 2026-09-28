@@ -13,6 +13,7 @@ import (
 	"github.com/kitecloud/kite/kite-service/internal/api/handler/auth"
 	"github.com/kitecloud/kite/kite-service/internal/api/handler/billing"
 	commandhandler "github.com/kitecloud/kite/kite-service/internal/api/handler/command"
+	"github.com/kitecloud/kite/kite-service/internal/api/handler/credit_limit"
 	eventlistener "github.com/kitecloud/kite/kite-service/internal/api/handler/event_listener"
 	"github.com/kitecloud/kite/kite-service/internal/api/handler/logs"
 	"github.com/kitecloud/kite/kite-service/internal/api/handler/message"
@@ -38,6 +39,7 @@ func (s *APIServer) RegisterRoutes(
 	appStore store.AppStore,
 	logStore store.LogStore,
 	usageStore store.UsageStore,
+	creditLimitStore store.CreditLimitStore,
 	commandStore store.CommandStore,
 	variableStore store.VariableStore,
 	variableValueStore store.VariableValueStore,
@@ -207,6 +209,14 @@ func (s *APIServer) RegisterRoutes(
 	usageGroup.Get("/credits", handler.Typed(usageHandler.HandleUsageCreditsGet))
 	usageGroup.Get("/by-day", handler.Typed(usageHandler.HandleUsageByDayList))
 	usageGroup.Get("/by-type", handler.Typed(usageHandler.HandleUsageByTypeList))
+
+	// Credit limit routes
+	creditLimitHandler := credit_limit.NewCreditLimitHandler(creditLimitStore)
+
+	creditLimitsGroup := appGroup.Group("/credit-limits")
+	creditLimitsGroup.Get("/", handler.Typed(creditLimitHandler.HandleCreditLimitList))
+	creditLimitsGroup.Post("/", handler.TypedWithBody(creditLimitHandler.HandleCreditLimitUpsert))
+	creditLimitsGroup.Post("/delete", handler.TypedWithBody(creditLimitHandler.HandleCreditLimitDelete))
 
 	// Command routes
 	commandsHandler := commandhandler.NewCommandHandler(commandStore, commandManager)

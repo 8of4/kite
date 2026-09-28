@@ -28,6 +28,7 @@ type Env struct {
 	BlockRateLimiter     *BlockRateLimiter
 	LogStore             store.LogStore
 	UsageStore           store.UsageStore
+	CreditLimitStore     store.CreditLimitStore
 	MessageStore         store.MessageStore
 	MessageInstanceStore store.MessageInstanceStore
 	CommandStore         store.CommandStore
@@ -162,6 +163,12 @@ func (s Env) executeFlowEvent(
 	}
 
 	if !shouldExecute {
+		return
+	}
+
+	if blocked, message := s.creditLimitExceeded(ctx, appID, fCtx.Data.GuildID(), fCtx.Data.UserID()); blocked {
+		s.createLogEntry(appID, model.LogLevelWarn, message, links)
+		respondCreditLimit(ctx, session, event, message)
 		return
 	}
 
