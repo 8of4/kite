@@ -26,7 +26,7 @@ type CreditLimitUpsertRequest struct {
 
 func (req CreditLimitUpsertRequest) Validate() error {
 	return validation.ValidateStruct(&req,
-		validation.Field(&req.Type, validation.Required, validation.In("total", "server", "user")),
+		validation.Field(&req.Type, validation.Required, validation.In("server", "user")),
 		validation.Field(&req.MaxCredits, validation.Min(0)),
 	)
 }
@@ -40,7 +40,7 @@ type CreditLimitDeleteRequest struct {
 
 func (req CreditLimitDeleteRequest) Validate() error {
 	return validation.ValidateStruct(&req,
-		validation.Field(&req.Type, validation.Required, validation.In("total", "server", "user")),
+		validation.Field(&req.Type, validation.Required, validation.In("server", "user")),
 	)
 }
 

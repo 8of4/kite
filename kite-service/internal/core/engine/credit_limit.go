@@ -40,16 +40,6 @@ func (s Env) creditLimitExceeded(ctx context.Context, appID string, guildID disc
 
 	start, end := startAndEndOfMonth(time.Now().UTC())
 
-	if cap := resolveLimit(limits, model.CreditLimitTypeTotal, ""); cap > 0 {
-		used, err := s.UsageStore.UsageCreditsUsedBetween(ctx, appID, start, end)
-		if err == nil {
-			logCreditThreshold(appID, "total", "", used, cap)
-			if used >= cap {
-				return true, "This bot has reached its monthly credit limit."
-			}
-		}
-	}
-
 	if guildID != 0 {
 		if cap := resolveLimit(limits, model.CreditLimitTypeServer, guildID.String()); cap > 0 {
 			used, err := s.UsageStore.UsageCreditsUsedByGuildBetween(ctx, appID, guildID.String(), start, end)
