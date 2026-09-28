@@ -220,8 +220,20 @@ type UsageRecord struct {
 	CommandID       pgtype.Text
 	EventListenerID pgtype.Text
 	MessageID       pgtype.Text
+	GuildID         pgtype.Text
+	UserID          pgtype.Text
 	CreditsUsed     int32
 	CreatedAt       pgtype.Timestamp
+}
+
+type CreditLimit struct {
+	ID         int64
+	AppID      string
+	Type       string
+	TargetID   pgtype.Text
+	MaxCredits int32
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
 }
 
 type User struct {

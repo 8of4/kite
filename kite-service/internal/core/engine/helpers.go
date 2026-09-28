@@ -207,10 +207,20 @@ func (s Env) finishFlowRun(appID string, links entityLinks, fCtx *flow.FlowConte
 		)
 	}
 
+	var guildID, userID null.String
+	if gid := fCtx.Data.GuildID(); gid != 0 {
+		guildID = null.StringFrom(gid.String())
+	}
+	if uid := fCtx.Data.UserID(); uid != 0 {
+		userID = null.StringFrom(uid.String())
+	}
+
 	s.createUsageRecord(
 		appID,
 		fCtx.CreditsUsed(),
 		links,
+		guildID,
+		userID,
 	)
 }
 
@@ -233,7 +243,7 @@ func (s Env) createLogEntry(appID string, level model.LogLevel, message string, 
 	}
 }
 
-func (s Env) createUsageRecord(appID string, creditsUsed int, links entityLinks) {
+func (s Env) createUsageRecord(appID string, creditsUsed int, links entityLinks, guildID null.String, userID null.String) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
 
@@ -244,6 +254,8 @@ func (s Env) createUsageRecord(appID string, creditsUsed int, links entityLinks)
 		CommandID:       links.CommandID,
 		EventListenerID: links.EventListenerID,
 		MessageID:       links.MessageID,
+		GuildID:         guildID,
+		UserID:          userID,
 		CreditsUsed:     creditsUsed,
 		CreatedAt:       time.Now().UTC(),
 	})

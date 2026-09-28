@@ -17,9 +17,39 @@ func (c *Client) CreateUsageRecord(ctx context.Context, record model.UsageRecord
 		CommandID:       pgtype.Text{String: record.CommandID.String, Valid: record.CommandID.Valid},
 		EventListenerID: pgtype.Text{String: record.EventListenerID.String, Valid: record.EventListenerID.Valid},
 		MessageID:       pgtype.Text{String: record.MessageID.String, Valid: record.MessageID.Valid},
+		GuildID:         pgtype.Text{String: record.GuildID.String, Valid: record.GuildID.Valid},
+		UserID:          pgtype.Text{String: record.UserID.String, Valid: record.UserID.Valid},
 		CreditsUsed:     int32(record.CreditsUsed),
 		CreatedAt:       pgtype.Timestamp{Time: record.CreatedAt, Valid: true},
 	})
+}
+
+func (c *Client) UsageCreditsUsedByGuildBetween(ctx context.Context, appID string, guildID string, start time.Time, end time.Time) (int, error) {
+	res, err := c.Q.GetUsageCreditsUsedByGuildBetween(ctx, pgmodel.GetUsageCreditsUsedByGuildBetweenParams{
+		AppID:   appID,
+		GuildID: pgtype.Text{String: guildID, Valid: true},
+		StartAt: pgtype.Timestamp{Time: start, Valid: true},
+		EndAt:   pgtype.Timestamp{Time: end, Valid: true},
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(res), nil
+}
+
+func (c *Client) UsageCreditsUsedByUserBetween(ctx context.Context, appID string, userID string, start time.Time, end time.Time) (int, error) {
+	res, err := c.Q.GetUsageCreditsUsedByUserBetween(ctx, pgmodel.GetUsageCreditsUsedByUserBetweenParams{
+		AppID:   appID,
+		UserID:  pgtype.Text{String: userID, Valid: true},
+		StartAt: pgtype.Timestamp{Time: start, Valid: true},
+		EndAt:   pgtype.Timestamp{Time: end, Valid: true},
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(res), nil
 }
 
 func (c *Client) UsageRecordsBetween(ctx context.Context, appID string, start time.Time, end time.Time) ([]model.UsageRecord, error) {

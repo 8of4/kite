@@ -18,11 +18,13 @@ INSERT INTO usage_records (
     command_id,
     event_listener_id,
     message_id,
+    guild_id,
+    user_id,
     credits_used,
     created_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
-) RETURNING id, type, app_id, command_id, event_listener_id, message_id, credits_used, created_at
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
+)
 `
 
 type CreateUsageRecordParams struct {
@@ -31,6 +33,8 @@ type CreateUsageRecordParams struct {
 	CommandID       pgtype.Text
 	EventListenerID pgtype.Text
 	MessageID       pgtype.Text
+	GuildID         pgtype.Text
+	UserID          pgtype.Text
 	CreditsUsed     int32
 	CreatedAt       pgtype.Timestamp
 }
@@ -42,10 +46,48 @@ func (q *Queries) CreateUsageRecord(ctx context.Context, arg CreateUsageRecordPa
 		arg.CommandID,
 		arg.EventListenerID,
 		arg.MessageID,
+		arg.GuildID,
+		arg.UserID,
 		arg.CreditsUsed,
 		arg.CreatedAt,
 	)
 	return err
+}
+
+const getUsageCreditsUsedByGuildBetween = `-- name: GetUsageCreditsUsedByGuildBetween :one
+SELECT COALESCE(SUM(credits_used), 0)::int FROM usage_records WHERE app_id = $1 AND guild_id = $2 AND created_at BETWEEN $3 AND $4
+`
+
+type GetUsageCreditsUsedByGuildBetweenParams struct {
+	AppID   string
+	GuildID pgtype.Text
+	StartAt pgtype.Timestamp
+	EndAt   pgtype.Timestamp
+}
+
+func (q *Queries) GetUsageCreditsUsedByGuildBetween(ctx context.Context, arg GetUsageCreditsUsedByGuildBetweenParams) (int32, error) {
+	row := q.db.QueryRow(ctx, getUsageCreditsUsedByGuildBetween, arg.AppID, arg.GuildID, arg.StartAt, arg.EndAt)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}
+
+const getUsageCreditsUsedByUserBetween = `-- name: GetUsageCreditsUsedByUserBetween :one
+SELECT COALESCE(SUM(credits_used), 0)::int FROM usage_records WHERE app_id = $1 AND user_id = $2 AND created_at BETWEEN $3 AND $4
+`
+
+type GetUsageCreditsUsedByUserBetweenParams struct {
+	AppID   string
+	UserID  pgtype.Text
+	StartAt pgtype.Timestamp
+	EndAt   pgtype.Timestamp
+}
+
+func (q *Queries) GetUsageCreditsUsedByUserBetween(ctx context.Context, arg GetUsageCreditsUsedByUserBetweenParams) (int32, error) {
+	row := q.db.QueryRow(ctx, getUsageCreditsUsedByUserBetween, arg.AppID, arg.UserID, arg.StartAt, arg.EndAt)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const deleteUsageRecordsBefore = `-- name: DeleteUsageRecordsBefore :execrows

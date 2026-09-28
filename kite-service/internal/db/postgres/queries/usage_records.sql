@@ -5,11 +5,19 @@ INSERT INTO usage_records (
     command_id,
     event_listener_id,
     message_id,
+    guild_id,
+    user_id,
     credits_used,
     created_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
-) RETURNING *;
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
+);
+
+-- name: GetUsageCreditsUsedByGuildBetween :one
+SELECT COALESCE(SUM(credits_used), 0)::int FROM usage_records WHERE app_id = @app_id AND guild_id = @guild_id AND created_at BETWEEN @start_at AND @end_at;
+
+-- name: GetUsageCreditsUsedByUserBetween :one
+SELECT COALESCE(SUM(credits_used), 0)::int FROM usage_records WHERE app_id = @app_id AND user_id = @user_id AND created_at BETWEEN @start_at AND @end_at;
 
 -- name: GetUsageRecordsByAppBetween :many
 SELECT * FROM usage_records WHERE app_id = @app_id AND created_at BETWEEN @start_at AND @end_at ORDER BY created_at DESC;
