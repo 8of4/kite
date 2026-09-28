@@ -25,7 +25,7 @@ function DefaultLimitRow({
   value,
 }: {
   appId: string;
-  type: "server" | "user";
+  type: "total" | "server" | "user";
   title: string;
   description: string;
   value: number;
@@ -94,9 +94,14 @@ export default function AppCreditLimits() {
   const [newMax, setNewMax] = useState("");
 
   const defaults = useMemo(() => {
+    const total = limits?.find((l) => l?.type === "total" && !l?.target_id);
     const server = limits?.find((l) => l?.type === "server" && !l?.target_id);
     const user = limits?.find((l) => l?.type === "user" && !l?.target_id);
-    return { server: server?.max_credits ?? 0, user: user?.max_credits ?? 0 };
+    return {
+      total: total?.max_credits ?? 0,
+      server: server?.max_credits ?? 0,
+      user: user?.max_credits ?? 0,
+    };
   }, [limits]);
 
   const overrides = useMemo(
@@ -130,9 +135,17 @@ export default function AppCreditLimits() {
             Default limits
           </h2>
           <p className="text-sm text-muted-foreground">
-            Applied to every server and every user, unless overridden below.
+            Caps counted against this month&apos;s credit usage. Reaching a limit
+            stops the bot from running flows in that scope until next month.
           </p>
         </div>
+        <DefaultLimitRow
+          appId={appId}
+          type="total"
+          title="Whole bot"
+          description="Most credits this bot can spend in total each month, across every server and user."
+          value={defaults.total}
+        />
         <DefaultLimitRow
           appId={appId}
           type="server"

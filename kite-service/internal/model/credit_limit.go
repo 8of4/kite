@@ -9,6 +9,7 @@ import (
 type CreditLimitType string
 
 const (
+	CreditLimitTypeTotal  CreditLimitType = "total"
 	CreditLimitTypeServer CreditLimitType = "server"
 	CreditLimitTypeUser   CreditLimitType = "user"
 )

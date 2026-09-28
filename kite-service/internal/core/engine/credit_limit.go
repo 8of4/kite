@@ -2,6 +2,7 @@ package engine
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"github.com/diamondburned/arikawa/v3/api"
@@ -21,7 +22,7 @@ func respondCreditLimit(ctx context.Context, session *state.State, event gateway
 	_ = session.RespondInteraction(i.ID, i.Token, api.InteractionResponse{
 		Type: api.MessageInteractionWithSource,
 		Data: &api.InteractionResponseData{
-			Content: option.NewNullableString(message),
+			Content: option.NewNullableString("An error occurred while executing the flow event: ```" + message + "```"),
 			Flags:   discord.EphemeralMessage,
 		},
 	})
@@ -39,11 +40,24 @@ func (s Env) creditLimitExceeded(ctx context.Context, appID string, guildID disc
 
 	start, end := startAndEndOfMonth(time.Now().UTC())
 
+	if cap := resolveLimit(limits, model.CreditLimitTypeTotal, ""); cap > 0 {
+		used, err := s.UsageStore.UsageCreditsUsedBetween(ctx, appID, start, end)
+		if err == nil {
+			logCreditThreshold(appID, "total", "", used, cap)
+			if used >= cap {
+				return true, "This bot has reached its monthly credit limit."
+			}
+		}
+	}
+
 	if guildID != 0 {
 		if cap := resolveLimit(limits, model.CreditLimitTypeServer, guildID.String()); cap > 0 {
 			used, err := s.UsageStore.UsageCreditsUsedByGuildBetween(ctx, appID, guildID.String(), start, end)
-			if err == nil && used >= cap {
-				return true, "This server has reached its monthly usage limit for this bot."
+			if err == nil {
+				logCreditThreshold(appID, "server", guildID.String(), used, cap)
+				if used >= cap {
+					return true, "This server has reached its monthly credit limit for this bot."
+				}
 			}
 		}
 	}
@@ -51,13 +65,46 @@ func (s Env) creditLimitExceeded(ctx context.Context, appID string, guildID disc
 	if userID != 0 {
 		if cap := resolveLimit(limits, model.CreditLimitTypeUser, userID.String()); cap > 0 {
 			used, err := s.UsageStore.UsageCreditsUsedByUserBetween(ctx, appID, userID.String(), start, end)
-			if err == nil && used >= cap {
-				return true, "You have reached your monthly usage limit for this bot."
+			if err == nil {
+				logCreditThreshold(appID, "user", userID.String(), used, cap)
+				if used >= cap {
+					return true, "You have reached your monthly credit limit for this bot."
+				}
 			}
 		}
 	}
 
 	return false, ""
+}
+
+func logCreditThreshold(appID string, scope string, targetID string, used int, cap int) {
+	if cap <= 0 {
+		return
+	}
+
+	pct := used * 100 / cap
+
+	var band int
+	switch {
+	case pct >= 100:
+		band = 100
+	case pct >= 80:
+		band = 80
+	case pct >= 50:
+		band = 50
+	default:
+		return
+	}
+
+	slog.Warn(
+		"Credit limit threshold reached",
+		slog.String("app_id", appID),
+		slog.String("scope", scope),
+		slog.String("target_id", targetID),
+		slog.Int("used", used),
+		slog.Int("limit", cap),
+		slog.Int("percent", band),
+	)
 }
 
 func resolveLimit(limits []model.CreditLimit, limitType model.CreditLimitType, targetID string) int {
