@@ -1,6 +1,7 @@
 import {
   ChevronRightIcon,
   CrownIcon,
+  GaugeIcon,
   LayoutDashboardIcon,
   MessageSquareWarningIcon,
   Settings2Icon,
@@ -55,6 +56,12 @@ export default function AppSidebarMainNav() {
         url: "/apps/[appId]/premium",
         icon: CrownIcon,
         active: isActive("/apps/[appId]/premium"),
+      },
+      {
+        title: "Credit Limits",
+        url: "/apps/[appId]/credit-limits",
+        icon: GaugeIcon,
+        active: isActive("/apps/[appId]/credit-limits"),
       },
       {
         title: "Settings",

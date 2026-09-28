@@ -29,6 +29,7 @@ import {
   UsageByDayListResponse,
   UsageByTypeListResponse,
   UsageCreditsGetResponse,
+  CreditLimitListResponse,
   UserGetResponse,
   VariableGetResponse,
   VariableListResponse,
@@ -368,5 +369,16 @@ export function usePluginInstanceQuery(appId: string, pluginId: string) {
         `/v1/apps/${appId}/plugins/${pluginId}`
       ),
     enabled: !!appId && !!pluginId,
+  });
+}
+
+export function useCreditLimitsQuery(appId: string) {
+  return useQuery({
+    queryKey: ["apps", appId, "credit-limits"],
+    queryFn: () =>
+      apiRequest<CreditLimitListResponse>(
+        `/v1/apps/${appId}/credit-limits`
+      ),
+    enabled: !!appId,
   });
 }

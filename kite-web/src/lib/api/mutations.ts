@@ -1,5 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  CreditLimitUpsertRequest,
+  CreditLimitUpsertResponse,
+  CreditLimitDeleteRequest,
+  CreditLimitDeleteResponse,
   AppCollaboratorCreateRequest,
   AppCollaboratorCreateResponse,
   AppCollaboratorDeleteResponse,
@@ -872,5 +876,43 @@ export function useShareCodeResolveMutation() {
       apiRequest<ShareCodeGetResponse>(
         `/v1/share-codes/${encodeURIComponent(code)}`
       ),
+  });
+}
+
+export function useCreditLimitUpsertMutation(appId: string) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (req: CreditLimitUpsertRequest) =>
+      apiRequest<CreditLimitUpsertResponse>(
+        `/v1/apps/${appId}/credit-limits`,
+        {
+          method: "POST",
+          body: JSON.stringify(req),
+          headers: { "Content-Type": "application/json" },
+        }
+      ),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ["apps", appId, "credit-limits"] });
+    },
+  });
+}
+
+export function useCreditLimitDeleteMutation(appId: string) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (req: CreditLimitDeleteRequest) =>
+      apiRequest<CreditLimitDeleteResponse>(
+        `/v1/apps/${appId}/credit-limits/delete`,
+        {
+          method: "POST",
+          body: JSON.stringify(req),
+          headers: { "Content-Type": "application/json" },
+        }
+      ),
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ["apps", appId, "credit-limits"] });
+    },
   });
 }

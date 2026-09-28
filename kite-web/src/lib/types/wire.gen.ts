@@ -498,6 +498,29 @@ export interface UsageByTypeEntry {
 }
 
 //////////
+// source: credit_limit.go
+
+export interface CreditLimit {
+  type: string;
+  target_id: null | string;
+  max_credits: number /* int */;
+  created_at: string /* RFC3339 */;
+  updated_at: string /* RFC3339 */;
+}
+export type CreditLimitListResponse = (CreditLimit | undefined)[];
+export interface CreditLimitUpsertRequest {
+  type: string;
+  target_id: null | string;
+  max_credits: number /* int */;
+}
+export type CreditLimitUpsertResponse = CreditLimit;
+export interface CreditLimitDeleteRequest {
+  type: string;
+  target_id: null | string;
+}
+export type CreditLimitDeleteResponse = Record<string, never>;
+
+//////////
 // source: user.go
 
 export interface User {
