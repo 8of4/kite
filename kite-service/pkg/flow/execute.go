@@ -14,6 +14,7 @@ import (
 	"github.com/diamondburned/arikawa/v3/api"
 	"github.com/diamondburned/arikawa/v3/discord"
 	"github.com/diamondburned/arikawa/v3/gateway"
+	"github.com/diamondburned/arikawa/v3/state"
 	"github.com/diamondburned/arikawa/v3/utils/json/option"
 	"github.com/diamondburned/arikawa/v3/utils/ws"
 	"github.com/kitecloud/kite/kite-service/internal/util"
@@ -40,9 +41,9 @@ func eventTriggerResult(e ws.Event) (thing.Thing, bool) {
 		return thing.NewDiscordMember(d.Member), true
 	case *gateway.GuildMemberRemoveEvent:
 		return thing.NewDiscordUser(d.User), true
-	case *gateway.GuildCreateEvent:
+	case *state.GuildJoinEvent:
 		return thing.NewDiscordGuild(d.Guild), true
-	case *gateway.GuildDeleteEvent:
+	case *state.GuildLeaveEvent:
 		return thing.NewDiscordGuild(discord.Guild{ID: d.ID}), true
 	case *gateway.ChannelCreateEvent:
 		return thing.NewString(d.ID.String()), true
